@@ -1,5 +1,5 @@
 # ResourceHost
-A free open-source memory cache based temporary resourcepack hosting based on Spring.
+A very simple free open-source memory cache-based temporary resource pack hosting based on Spring.
 
 WIP!
 Please do not use this software just yet!
