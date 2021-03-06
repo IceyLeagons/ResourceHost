@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 public class APIController {
 
-    private final long MB = 2;
+    private final long MB = 20;
     private final long MB_LIMIT = MB * 1000000L;
 
     @Autowired
@@ -39,7 +39,7 @@ public class APIController {
     @Autowired
     private RateLimitService rateLimitService;
 
-    @PostMapping("/")
+    @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -54,7 +54,7 @@ public class APIController {
             if (extension == null) throw new IllegalStateException();
 
             if (!extension.equalsIgnoreCase("zip")) {
-                objectNode.put("error", "Unsupported media type! Supported types are: .zip");
+                objectNode.put("error", "Unsupported media type! Supported type is: .zip");
                 return new ResponseEntity<>(objectNode.toString(), HttpStatus.UNSUPPORTED_MEDIA_TYPE);
             }
 
@@ -69,7 +69,7 @@ public class APIController {
             ConsumptionProbe consumptionProbe = bucket.tryConsumeAndReturnRemaining(rateLimitService.getUploadCost());
 
             if (consumptionProbe.isConsumed()) {
-                objectNode.put("id", hostService.upload(new HostService.HostedFile(extension, file.getBytes())));
+                objectNode.put("id", hostService.upload(file));
                 objectNode.put("remaining-tokens", consumptionProbe.getRemainingTokens());
                 return new ResponseEntity<>(objectNode.toString(), HttpStatus.OK);
             }
@@ -84,22 +84,52 @@ public class APIController {
         }
     }
 
-    @GetMapping( value = "/files/{id:.+}", produces = MediaType.MULTIPART_MIXED_VALUE)
+    @GetMapping(value = "/exists/{id:.+}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> exists(@PathVariable String id, HttpServletRequest request) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode objectNode = objectMapper.createObjectNode();
 
+            Bucket bucket = rateLimitService.getOther(request.getRemoteAddr());
+            ConsumptionProbe consumptionProbe = bucket.tryConsumeAndReturnRemaining(rateLimitService.getDownloadRateLimit());
+
+            if (consumptionProbe.isConsumed()) {
+                byte[] data = hostService.retrieve(id);
+                if (data == null) {
+                    objectNode.put("exists", false);
+                    objectNode.put("checksum", "");
+                    return new ResponseEntity<>(objectNode.toString(), HttpStatus.NOT_FOUND);
+                }
+
+                objectNode.put("exists", true);
+                objectNode.put("checksum", hostService.getChecksum(data));
+                return new ResponseEntity<>(objectNode.toString(), HttpStatus.FOUND);
+            }
+
+            return new ResponseEntity<>(null, HttpStatus.TOO_MANY_REQUESTS);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping( value = "/files/{id:.+}", produces = MediaType.MULTIPART_MIXED_VALUE)
     @ResponseBody
     public ResponseEntity<byte[]> serveFile(@PathVariable String id, HttpServletRequest request, HttpServletResponse httpServletResponse) {
-
         try {
             Bucket bucket = rateLimitService.getDownload(request.getRemoteAddr());
 
             ConsumptionProbe consumptionProbe = bucket.tryConsumeAndReturnRemaining(rateLimitService.getDownloadRateLimit());
 
             if (consumptionProbe.isConsumed()) {
-                HostService.HostedFile file = hostService.retrieve(id);
+                byte[] data = hostService.retrieve(id);
+                if (data == null) return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+
 
 
                 return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + id + "."+file.getType()+"\"").body(file.getData());
+                        "attachment; filename=\"" + id + ".zip\"").body(data);
             }
 
             return new ResponseEntity<>(null, HttpStatus.TOO_MANY_REQUESTS);

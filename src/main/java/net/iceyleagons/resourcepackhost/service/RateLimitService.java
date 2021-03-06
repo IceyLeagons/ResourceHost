@@ -1,6 +1,5 @@
 package net.iceyleagons.resourcepackhost.service;
 
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -52,11 +51,27 @@ public class RateLimitService {
                 }
             });
 
+    private final LoadingCache<String, Bucket> otherCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(1, TimeUnit.HOURS)
+            .initialCapacity(10)
+            .maximumSize(250)
+            .build(new CacheLoader<>() {
+                @Override
+                public Bucket load(String key) {
+                    Bandwidth bandwidth = Bandwidth.classic(5, Refill.intervally(5, Duration.ofMinutes(1)));
+                    return Bucket4j.builder().addLimit(bandwidth).build();
+                }
+            });
+
     public Bucket get(String id) throws ExecutionException {
         return cache.get(id);
     }
 
     public Bucket getDownload(String id) throws ExecutionException {
+        return downloadCache.get(id);
+    }
+
+    public Bucket getOther(String id) throws ExecutionException {
         return downloadCache.get(id);
     }
 }
