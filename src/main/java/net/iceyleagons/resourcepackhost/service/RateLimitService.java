@@ -31,7 +31,8 @@ public class RateLimitService {
             .expireAfterAccess(1, TimeUnit.HOURS)
             .initialCapacity(10)
             .maximumSize(250)
-            .build(new CacheLoader<>() {
+            .build(new CacheLoader<String, Bucket>() {
+
                 @Override
                 public Bucket load(String key) {
                     Bandwidth bandwidth = Bandwidth.classic(5, Refill.intervally(5, Duration.ofHours(1)));
@@ -43,7 +44,7 @@ public class RateLimitService {
             .expireAfterAccess(1, TimeUnit.HOURS)
             .initialCapacity(10)
             .maximumSize(250)
-            .build(new CacheLoader<>() {
+            .build(new CacheLoader<String, Bucket>() {
                 @Override
                 public Bucket load(String key) {
                     Bandwidth bandwidth = Bandwidth.classic(5, Refill.intervally(5, Duration.ofMinutes(1)));
@@ -55,7 +56,7 @@ public class RateLimitService {
             .expireAfterAccess(1, TimeUnit.HOURS)
             .initialCapacity(10)
             .maximumSize(250)
-            .build(new CacheLoader<>() {
+            .build(new CacheLoader<String, Bucket>() {
                 @Override
                 public Bucket load(String key) {
                     Bandwidth bandwidth = Bandwidth.classic(5, Refill.intervally(5, Duration.ofMinutes(1)));
