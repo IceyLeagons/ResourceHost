@@ -39,7 +39,7 @@ public class APIController {
     @Autowired
     private RateLimitService rateLimitService;
 
-    @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/api/upload", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -84,7 +84,7 @@ public class APIController {
         }
     }
 
-    @GetMapping(value = "/exists/{id:.+}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/api/exists/{id:.+}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> exists(@PathVariable String id, HttpServletRequest request) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -114,7 +114,7 @@ public class APIController {
         }
     }
 
-    @GetMapping( value = "/files/{id:.+}", produces = MediaType.MULTIPART_MIXED_VALUE)
+    @GetMapping( value = "/get/{id:.+}", produces = MediaType.MULTIPART_MIXED_VALUE)
     @ResponseBody
     public ResponseEntity<byte[]> serveFile(@PathVariable String id, HttpServletRequest request, HttpServletResponse httpServletResponse) {
         try {
