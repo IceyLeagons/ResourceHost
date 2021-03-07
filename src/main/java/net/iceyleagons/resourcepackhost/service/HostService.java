@@ -37,11 +37,9 @@ public class HostService {
         new Thread(() -> {
             while (true) {
                 try {
-                    System.out.println("TICK");
                     Arrays.stream(Objects.requireNonNull(directory.listFiles())).filter(this::shouldDelete).forEach(file -> {
                         if (file.getParentFile().getName().contains("packs")) {
                             if (file.getName().contains("zip")) {
-                                System.out.println("Deleting a file");
                                 if (!file.delete())
                                     System.out.println("Could not delete expired pack named: " + file.getName());
                             }

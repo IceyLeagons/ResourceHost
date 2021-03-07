@@ -8,7 +8,7 @@
         <style>
             body {
                 height: 100vh;
-                background-image: radial-gradient(rgba(0,0,0, 0.4), rgba(0,0,0, 0.6)), url('../static/imgs/bg.jpg');
+                background-image: radial-gradient(rgba(0,0,0, 0.4), rgba(0,0,0, 0.6)), url('./static/imgs/bg.jpg');
                 background-repeat: no-repeat;
                 background-size: cover;
             }
@@ -71,7 +71,7 @@
                             <hr>
                             <form th:action="@{/userupload}" enctype="multipart/form-data" method="POST">
                                 <div class="mb-3">
-                                    <input type="file" class="form-control" name="file" id="file" aria-describedby="fileNotification" required>
+                                    <input type="file" class="form-control" name="file" id="file" aria-describedby="fileNotification" accept=".zip" required>
                                     <div id="fileNotification" class="form-text">You can only upload <b>20 MB, .zip</b> files.</div>
                                 </div>
                                 <div id="captcha"></div>
