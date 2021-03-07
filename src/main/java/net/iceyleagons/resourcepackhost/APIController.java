@@ -30,8 +30,8 @@ import java.util.concurrent.TimeUnit;
 @RestController
 public class APIController {
 
-    private final long MB = 20;
-    private final long MB_LIMIT = MB * 1000000L;
+    public static final long MB = 20;
+    public static final long MB_LIMIT = MB * 1000000L;
 
     @Autowired
     private HostService hostService;

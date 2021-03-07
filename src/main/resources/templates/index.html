@@ -16,10 +16,10 @@
                 color: white;
             }
         </style>
-        <script type="text/javascript">
+        <script type="text/javascript" th:inline="javascript">
             var onloadCallback = function() {
                 grecaptcha.render('captcha', {
-                    'sitekey' : '6LfUUXUaAAAAAB9NpgD6J4wtAMb99qQGBuBCixcD'
+                    'sitekey' : [[${siteKey}]]
                 });
             };
         </script>
