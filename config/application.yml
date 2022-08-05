@@ -1,0 +1,6 @@
+repo:
+  mb-limit: 40
+  retain-time: 120 # In minutes
+rate:
+  upload-cost: 3
+  download-cost: 1
